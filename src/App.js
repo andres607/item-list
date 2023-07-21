@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPencilAlt, faTrashAlt, faSearch } from '@fortawesome/free-solid-svg-icons';
 import './App.css';
 
 const App = () => {
@@ -11,7 +9,6 @@ const App = () => {
   const [items, setItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [autocompleteOptions, setAutocompleteOptions] = useState([]);
-  const [existingCodes, setExistingCodes] = useState([]);
 
   useEffect(() => {
     const storedItems = JSON.parse(localStorage.getItem('items'));
@@ -22,29 +19,31 @@ const App = () => {
 
   useEffect(() => {
     localStorage.setItem('items', JSON.stringify(items));
-    setExistingCodes(items.map((item) => item.code));
   }, [items]);
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    if (!existingCodes.includes(itemCode)) {
-      const newItem = {
-        code: itemCode,
-        name: itemName,
-        distributorPrice: parseFloat(itemDistributorPrice),
-        finalPrice: parseFloat(itemFinalPrice),
-      };
+    const newItem = {
+      code: itemCode,
+      name: itemName,
+      distributorPrice: parseFloat(itemDistributorPrice),
+      finalPrice: parseFloat(itemFinalPrice),
+    };
 
-      setItems([...items, newItem]);
-
-      setItemCode('');
-      setItemName('');
-      setItemDistributorPrice('');
-      setItemFinalPrice('');
-    } else {
-      alert('El código ya existe para otro item. Por favor, ingresa un código único.');
+    // Verificar si el código ya existe antes de agregar el item
+    const existingItem = items.find((item) => item.code === itemCode);
+    if (existingItem) {
+      alert('El código ya existe para otro item. Por favor, ingrese un código único.');
+      return;
     }
+
+    setItems([...items, newItem]);
+
+    setItemCode('');
+    setItemName('');
+    setItemDistributorPrice('');
+    setItemFinalPrice('');
   };
 
   const handleEditItem = (index) => {
@@ -74,10 +73,8 @@ const App = () => {
     setSearchTerm(searchTerm);
 
     if (searchTerm.length >= 2) {
-      const filteredOptions = items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.code.toLowerCase().includes(searchTerm.toLowerCase())
+      const filteredOptions = items.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.code.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setAutocompleteOptions(filteredOptions);
     } else {
@@ -90,10 +87,8 @@ const App = () => {
     setAutocompleteOptions([]);
   };
 
-  const filteredItems = items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.code.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -149,11 +144,10 @@ const App = () => {
             <input
               type="text"
               id="search-input"
-              placeholder="Buscar item..."
+              placeholder="Buscar item por nombre o código..."
               value={searchTerm}
               onChange={handleSearchInputChange}
             />
-            <FontAwesomeIcon icon={faSearch} className="search-icon" />
           </div>
         </div>
         <table id="item-table">
@@ -179,11 +173,17 @@ const App = () => {
                   <td>{item.distributorPrice}</td>
                   <td>{item.finalPrice}</td>
                   <td>
-                    <span className="edit-item" onClick={() => handleEditItem(index)}>
-                      <FontAwesomeIcon icon={faPencilAlt} />
+                    <span
+                      className="edit-item"
+                      onClick={() => handleEditItem(index)}
+                    >
+                      Editar
                     </span>
-                    <span className="delete-item" onClick={() => handleDeleteItem(index)}>
-                      <FontAwesomeIcon icon={faTrashAlt} />
+                    <span
+                      className="delete-item"
+                      onClick={() => handleDeleteItem(index)}
+                    >
+                      Eliminar
                     </span>
                   </td>
                 </tr>
@@ -193,7 +193,10 @@ const App = () => {
         </table>
         <ul id="autocomplete-list">
           {autocompleteOptions.map((option, index) => (
-            <li key={index} onClick={() => handleAutocompleteOptionClick(option)}>
+            <li
+              key={index}
+              onClick={() => handleAutocompleteOptionClick(option)}
+            >
               {option.name}
             </li>
           ))}
