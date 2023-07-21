@@ -24,19 +24,17 @@ const App = () => {
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
+    if (items.some((item) => item.code === itemCode)) {
+      alert('El código del item ya existe. Por favor, ingrese un código único.');
+      return;
+    }
+
     const newItem = {
       code: itemCode,
       name: itemName,
       distributorPrice: parseFloat(itemDistributorPrice),
       finalPrice: parseFloat(itemFinalPrice),
     };
-
-    // Verificar si el código ya existe antes de agregar el item
-    const existingItem = items.find((item) => item.code === itemCode);
-    if (existingItem) {
-      alert('El código ya existe para otro item. Por favor, ingrese un código único.');
-      return;
-    }
 
     setItems([...items, newItem]);
 
@@ -74,7 +72,7 @@ const App = () => {
 
     if (searchTerm.length >= 2) {
       const filteredOptions = items.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.code.toLowerCase().includes(searchTerm.toLowerCase())
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setAutocompleteOptions(filteredOptions);
     } else {
@@ -88,12 +86,13 @@ const App = () => {
   };
 
   const filteredItems = items.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) || item.code.toLowerCase().includes(searchTerm.toLowerCase())
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="container">
-      <h1>Aplicativo de Items</h1>
+      <h1>Lista de precios JOTEC SEAL</h1>
 
       <form onSubmit={handleFormSubmit}>
         <label htmlFor="item-code">Código del producto:</label>
@@ -144,7 +143,7 @@ const App = () => {
             <input
               type="text"
               id="search-input"
-              placeholder="Buscar item por nombre o código..."
+              placeholder="Buscar item..."
               value={searchTerm}
               onChange={handleSearchInputChange}
             />
@@ -170,8 +169,8 @@ const App = () => {
                 <tr key={index}>
                   <td>{item.code}</td>
                   <td>{item.name}</td>
-                  <td>{item.distributorPrice}</td>
-                  <td>{item.finalPrice}</td>
+                  <td>${item.distributorPrice.toFixed(2)}</td>
+                  <td>${item.finalPrice.toFixed(2)}</td>
                   <td>
                     <span
                       className="edit-item"
